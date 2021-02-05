@@ -12,7 +12,7 @@ public class SupplierServer {
     protected EmailService emailService;
 
 
-    public SupplierResponse[] orderItems(ItemOrder itemOrder[], Supplier supplier) {
+    public SupplierResponse[] orderItems(ItemOrder itemOrder[]) {
 
         SupplierResponse[] supplierResponses = new SupplierResponse[itemOrder.length];
 

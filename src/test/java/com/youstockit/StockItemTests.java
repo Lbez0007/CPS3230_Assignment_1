@@ -17,7 +17,7 @@ public class StockItemTests {
         }
 
         //Exercise
-        stockItem = new StockItem(1, name, "Testing", "Test Item", 10, 1000, 250, "Test Co Ltd", 1.50, 0);
+        stockItem = new StockItem(1, name, "Testing", "Test Item", 10, 1000, 250, 1.50);
 
         //Verify
         Assertions.assertNotEquals(name, stockItem.name);
@@ -29,7 +29,7 @@ public class StockItemTests {
         String name = "a";
 
         //Exercise
-        stockItem = new StockItem(1, name, "Testing", "Test Item", 10, 1000, 250, "Test Co Ltd", 1.50, 0);
+        stockItem = new StockItem(1, name, "Testing", "Test Item", 10, 1000, 250, 1.50);
 
         //Verify
         Assertions.assertNotEquals(name, stockItem.name);
@@ -44,7 +44,7 @@ public class StockItemTests {
         }
 
         //Exercise
-        stockItem = new StockItem(1, name, "Testing", "Test Item", 10, 1000, 250, "Test Co Ltd", 1.50, 0);
+        stockItem = new StockItem(1, name, "Testing", "Test Item", 10, 1000, 250,  1.50);
 
         //Verify
         Assertions.assertEquals(name, stockItem.name);
@@ -59,7 +59,7 @@ public class StockItemTests {
         }
 
         //Exercise
-        stockItem = new StockItem(1, "Test Product", "Testing", description, 10, 1000, 250, "Test Co Ltd", 1.50, 0);
+        stockItem = new StockItem(1, "Test Product", "Testing", description, 10, 1000, 250, 1.50);
 
         //Verify
         Assertions.assertNotEquals(description, stockItem.description);
@@ -74,7 +74,7 @@ public class StockItemTests {
         }
 
         //Exercise
-        stockItem = new StockItem(1, "Test Product", "Testing", description, 10, 1000, 250, "Test Co Ltd", 1.50, 0);
+        stockItem = new StockItem(1, "Test Product", "Testing", description, 10, 1000, 250,  1.50);
 
         //Verify
         Assertions.assertEquals(description, stockItem.description);

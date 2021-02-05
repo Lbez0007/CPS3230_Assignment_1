@@ -3,7 +3,6 @@ package com.youstockit;
 import com.youstockit.services.EmailService;
 import com.youstockit.services.OrderService;
 import com.youstockit.users.Manager;
-
 import java.util.LinkedList;
 import java.util.List;
 
@@ -12,6 +11,7 @@ public class ProductCatalogue {
     protected List<StockItem> items;
     protected EmailService emailService;
     protected OrderService orderService;
+    protected SupplierServer supplierServer;
     public Manager manager;
 
     public ProductCatalogue (){
@@ -95,35 +95,49 @@ public class ProductCatalogue {
     public void setEmailService(EmailService emailService){
         this.emailService = emailService;
     }
+
     public void setOrderService(OrderService orderService){
         this.orderService = orderService;
     }
 
-    public void automatedStockOrdering(SupplierErrorCode errorCode, int itemId, int qtySupplied){
-        if(errorCode.equals(SupplierErrorCode.SUCCESS)){
-            increaseItemQuantity(itemId, qtySupplied);
-        }
-        if(errorCode.equals(SupplierErrorCode.OUT_OF_STOCK)){
-            emailService.sendEmail(manager);
-            increaseItemQuantity(itemId, qtySupplied);
-        }
-        if(errorCode.equals(SupplierErrorCode.ITEM_NOT_FOUND)){
-            setMinimumOrderQuantityZero(itemId);
-        }
-        if(errorCode.equals(SupplierErrorCode.COMMUNICATION_ERROR)){
-            for (int i=0; i<3; i++){
-                try {
-                    Thread.sleep(5000);
-                    orderService.reOrder();
-                    if(!errorCode.equals(SupplierErrorCode.COMMUNICATION_ERROR)){
-                        break;
-                    }
-                } catch (InterruptedException e) {
-                    e.printStackTrace();
-                }
+    public void setSupplierServer(SupplierServer supplierServer){
+        this.supplierServer = supplierServer;
+    }
+
+    public SupplierResponse[] automatedStockOrdering(ItemOrder[] items){
+        SupplierResponse[] responses = supplierServer.orderItems(items);
+
+        for (int i = 0; i < items.length; i++) {
+            ItemOrder item = items[i];
+            SupplierErrorCode errorCode = responses[i].supplierErrorCode;
+            int qtySupplied = responses[i].qtyItemsProvided;
+
+            if (errorCode.equals(SupplierErrorCode.SUCCESS)) {
+                increaseItemQuantity(item.itemId, qtySupplied);
             }
-            emailService.sendEmail(manager);
+            if (errorCode.equals(SupplierErrorCode.OUT_OF_STOCK)) {
+                emailService.sendEmail(manager);
+                increaseItemQuantity(item.itemId, qtySupplied);
+            }
+            if (errorCode.equals(SupplierErrorCode.ITEM_NOT_FOUND)) {
+                setMinimumOrderQuantityZero(item.itemId);
+            }
+            if (errorCode.equals(SupplierErrorCode.COMMUNICATION_ERROR)) {
+                for (int j = 0; j < 3; j++) {
+                    try {
+                        Thread.sleep(5000);
+                        orderService.reOrder();
+                        if (!errorCode.equals(SupplierErrorCode.COMMUNICATION_ERROR)) {
+                            break;
+                        }
+                    } catch (InterruptedException e) {
+                        e.printStackTrace();
+                    }
+                }
+                emailService.sendEmail(manager);
+            }
         }
 
+        return responses;
     }
 }

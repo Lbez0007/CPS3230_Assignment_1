@@ -1,6 +1,7 @@
 package com.youstockit;
 
 import com.youstockit.factories.CatalogueProvisioning;
+import com.youstockit.services.EmailService;
 
 import java.util.List;
 import java.util.Scanner;
@@ -57,7 +58,36 @@ public class Main {
                 }
                 break;
             case 3:
-                //do logic
+                Scanner choiceCase3 = new Scanner(System.in);
+                System.out.println();
+                System.out.print("Insert Item ID: ");
+                int id = choiceCase3.nextInt();
+
+                System.out.print("Insert Item Name: ");
+                String name = choiceCase3.nextLine();
+
+                System.out.print("Insert Item Category: ");
+                String category = choiceCase3.nextLine();
+
+                System.out.print("Insert Item Description: ");
+                String description = choiceCase3.nextLine();
+
+                System.out.print("Insert Minimum Order Quantity for Item: ");
+                int minQty = choiceCase3.nextInt();
+
+                System.out.print("Insert Item Quantity: ");
+                int qty = choiceCase3.nextInt();
+
+                System.out.print("Insert Order Amount for Item: ");
+                int orderAmt = choiceCase3.nextInt();
+
+                System.out.print("Insert Selling Price for Item: ");
+                double sellingPrice = choiceCase3.nextDouble();
+
+                StockItem item = new StockItem(id, name, category, description, minQty, qty, orderAmt, sellingPrice);
+                catalogue.addItem(item);
+
+                System.out.println("Item added to catalogue!");
                 break;
             case 4:
                 Scanner choiceCase4 = new Scanner(System.in);
@@ -66,8 +96,11 @@ public class Main {
                 int choiceEntry4 = choiceCase4.nextInt();
 
                 boolean removed =  catalogue.removeItem(choiceEntry4);
-                if(removed)
-                    System.out.println("Item Removed");
+                if(removed) {
+//                    System.out.println("Item Removed");
+//                    EmailServiceSpy emailServiceSpy = new EmailServiceSpy();
+//                    catalogue.setEmailService(EmailServiceSpy);
+                }
                 else
                     System.out.println("Item not found in catalogue!");
                 break;
@@ -78,8 +111,7 @@ public class Main {
                 //do logic
                 break;
             case 7:
-                //do logic
-                break;
+                System.exit(0);
         }
     }
 }

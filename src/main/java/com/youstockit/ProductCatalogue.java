@@ -2,6 +2,7 @@ package com.youstockit;
 
 import com.youstockit.services.EmailService;
 import com.youstockit.services.OrderService;
+import com.youstockit.stubs.EmailServiceStub;
 import com.youstockit.users.Manager;
 import java.util.LinkedList;
 import java.util.List;
@@ -12,6 +13,7 @@ public class ProductCatalogue {
     protected EmailService emailService;
     protected OrderService orderService;
     protected SupplierServer supplierServer;
+    public double totalProfit;
     public Manager manager;
 
     public ProductCatalogue (){
@@ -46,6 +48,7 @@ public class ProductCatalogue {
         StockItem item = searchCatalogue(itemId);
         if (item != null) {
             items.remove(item);
+            emailService.sendEmail(manager);
             return true;
         }
         return false;
@@ -58,8 +61,10 @@ public class ProductCatalogue {
             item.quantity = item.quantity - qty;
             //checkOrderQuantity(item);
             item.numTimesSold++;
+            totalProfit += (item.sellingPrice * qty) - (item.costPrice * qty);
             removeNilQuantityItems();
         }
+
     }
 
     public ItemOrder checkOrderQuantity(StockItem item){
@@ -102,6 +107,10 @@ public class ProductCatalogue {
 
     public void setSupplierServer(SupplierServer supplierServer){
         this.supplierServer = supplierServer;
+    }
+
+    public void setManager(Manager manager){
+        this.manager = manager;
     }
 
     public SupplierResponse[] automatedStockOrdering(ItemOrder[] items){

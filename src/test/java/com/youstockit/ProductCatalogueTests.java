@@ -1,6 +1,8 @@
 package com.youstockit;
 
 import com.youstockit.factories.CatalogueProvisioning;
+import com.youstockit.spies.EmailServiceSpy;
+import com.youstockit.users.Manager;
 import org.junit.jupiter.api.Assertions;
 import org.junit.jupiter.api.BeforeEach;
 import org.junit.jupiter.api.Test;
@@ -12,15 +14,19 @@ public class ProductCatalogueTests {
     CatalogueProvisioning provisioning;
     ProductCatalogue productCatalogue;
     StockItem stockItem;
+    Manager manager;
+    EmailServiceSpy emailServiceSpy;
 
     @BeforeEach
     public void setup(){
         productCatalogue = new ProductCatalogue();
         // Instantiating object of Product Catalogue Factory
         provisioning = new CatalogueProvisioning();
+        emailServiceSpy = new EmailServiceSpy();
 
+        manager= new Manager("Mgr Test", "manager@test.com");
         stockItem = new StockItem(2, "Test Product 2", "Validating", "Validation Item", 5,
-                10, 20, 1.50);
+                10, 20, 1.00,1.50);
     }
 
     @Test
@@ -65,6 +71,8 @@ public class ProductCatalogueTests {
         //Setup
         ProductCatalogue productCatalogue = provisioning.provideStockedCatalogue();
         StockItem item = productCatalogue.items.get(0);
+        productCatalogue.setManager(manager);
+        productCatalogue.setEmailService(emailServiceSpy);
 
         //Exercise
         productCatalogue.removeItem(item.id);
@@ -78,6 +86,8 @@ public class ProductCatalogueTests {
         //Setup
         ProductCatalogue productCatalogue = provisioning.provideMultiStockedCatalogue();
         StockItem item = productCatalogue.items.get(0);
+        productCatalogue.setManager(manager);
+        productCatalogue.setEmailService(emailServiceSpy);
         int catSize = productCatalogue.items.size();
 
         //Exercise

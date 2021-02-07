@@ -1,6 +1,7 @@
 package com.youstockit;
 
 import com.youstockit.factories.CatalogueProvisioning;
+import com.youstockit.factories.SupplierServerProvisioning;
 import com.youstockit.services.SupplierOrderService;
 import com.youstockit.spies.EmailServiceSpy;
 import com.youstockit.spies.OrderServiceSpy;
@@ -19,6 +20,7 @@ public class SupplierResponseTests {
     Manager manager;
     ProductCatalogue productCatalogue;
     CatalogueProvisioning provisioning;
+    SupplierServerProvisioning provisioningSupplier;
     SupplierOrderService supplierOrderService;
     EmailServiceSpy emailServiceSpy;
     OrderServiceSpy orderServiceSpy;
@@ -32,8 +34,9 @@ public class SupplierResponseTests {
         manager= new Manager("Mgr Test", "manager@test.com");
         supplierServer.supplier = supplier;
 
-        // Instantiating object of Product Catalogue Factory
+        // Instantiating objects of Product Catalogue and Supplier Server Factories
         provisioning = new CatalogueProvisioning();
+        provisioningSupplier = new SupplierServerProvisioning();
 
         supplierOrderService = Mockito.mock(SupplierOrderService.class);
         emailServiceSpy = new EmailServiceSpy();
@@ -41,11 +44,15 @@ public class SupplierResponseTests {
 
         // Using Stocked Catalogue test double provided from factory
         productCatalogue = provisioning.provideStockedCatalogue();
+        // Using Supplier Server test double provided from factory
+        supplierServer = provisioningSupplier.provideSupplierServer();
+
         stockItem = productCatalogue.items.get(0);
         stockItemQty = stockItem.quantity;
 
         productCatalogue.setOrderService(orderServiceSpy);
         productCatalogue.setEmailService(emailServiceSpy);
+        productCatalogue.setManager(manager);
     }
 
     @Test

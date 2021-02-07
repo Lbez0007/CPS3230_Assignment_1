@@ -1,7 +1,14 @@
 package com.youstockit;
 
 import com.youstockit.factories.CatalogueProvisioning;
+import com.youstockit.factories.SupplierServerProvisioning;
 import com.youstockit.services.EmailService;
+import com.youstockit.services.OrderService;
+import com.youstockit.stubs.EmailServiceStub;
+import com.youstockit.stubs.OrderServiceStub;
+import com.youstockit.stubs.SupplierOrderServiceStub;
+import com.youstockit.users.Manager;
+import com.youstockit.users.Supplier;
 
 import java.util.List;
 import java.util.Scanner;
@@ -32,7 +39,19 @@ public class Main {
 
     public void menu(int choice) {
         CatalogueProvisioning provisioning = new CatalogueProvisioning();
+        SupplierServerProvisioning provisioningSupplier = new SupplierServerProvisioning();
         ProductCatalogue catalogue = provisioning.provideMultiStockedCatalogue();
+        SupplierServer supplierServer = provisioningSupplier.provideSupplierServer();
+        Manager manager= new Manager("Mgr Test", "manager@test.com");
+        EmailServiceStub emailServiceStub = new EmailServiceStub();
+        OrderServiceStub orderServiceStub = new OrderServiceStub();
+        SupplierOrderServiceStub supplierOrderServiceStub = new SupplierOrderServiceStub();
+
+        catalogue.setSupplierServer(supplierServer);
+        catalogue.setManager(manager);
+        catalogue.setEmailService(emailServiceStub);
+        catalogue.setOrderService(orderServiceStub);
+        supplierServer.setSupplierOrderService(supplierOrderServiceStub);
 
         switch (choice) {
             case 1:
@@ -47,9 +66,9 @@ public class Main {
                 Scanner choiceCase2 = new Scanner(System.in);
                 System.out.println();
                 System.out.print("Insert Category of items: ");
-                String choiceEntry2 = choiceCase2.nextLine();
+                String categoryCase2 = choiceCase2.nextLine();
 
-                List<StockItem> categoryItems = catalogue.searchCatalogueCategory(choiceEntry2);
+                List<StockItem> categoryItems = catalogue.searchCatalogueCategory(categoryCase2);
 
                 for (StockItem item : categoryItems) {
                     System.out.print("Item ID: " + item.id);
@@ -57,6 +76,7 @@ public class Main {
                     System.out.print(" Quantity: " + item.quantity);
                 }
                 break;
+
             case 3:
                 Scanner choiceCase3 = new Scanner(System.in);
                 System.out.println();
@@ -81,35 +101,57 @@ public class Main {
                 System.out.print("Insert Order Amount for Item: ");
                 int orderAmt = choiceCase3.nextInt();
 
+                System.out.print("Insert Cost Price for Item: ");
+                double costPrice = choiceCase3.nextDouble();
+
                 System.out.print("Insert Selling Price for Item: ");
                 double sellingPrice = choiceCase3.nextDouble();
 
-                StockItem item = new StockItem(id, name, category, description, minQty, qty, orderAmt, sellingPrice);
+                StockItem item = new StockItem(id, name, category, description, minQty, qty, orderAmt, costPrice, sellingPrice);
                 catalogue.addItem(item);
 
                 System.out.println("Item added to catalogue!");
                 break;
+
             case 4:
                 Scanner choiceCase4 = new Scanner(System.in);
                 System.out.println();
                 System.out.print("Insert ID of item to remove: ");
-                int choiceEntry4 = choiceCase4.nextInt();
+                int idCase4 = choiceCase4.nextInt();
 
-                boolean removed =  catalogue.removeItem(choiceEntry4);
+                boolean removed = catalogue.removeItem(idCase4);
                 if(removed) {
-//                    System.out.println("Item Removed");
-//                    EmailServiceSpy emailServiceSpy = new EmailServiceSpy();
-//                    catalogue.setEmailService(EmailServiceSpy);
+                    System.out.println("Item Removed");
                 }
                 else
                     System.out.println("Item not found in catalogue!");
                 break;
+
             case 5:
-                //do logic
+                Scanner choiceCase5= new Scanner(System.in);
+
+                System.out.println();
+                System.out.print("Insert ID of item to order: ");
+                int idCase5 = choiceCase5.nextInt();
+                System.out.println();
+                System.out.print("Insert quantity of item to order: ");
+                int qtyEntry = choiceCase5.nextInt();
+
+                catalogue.sellItem(idCase5, qtyEntry);
+                System.out.println("Customer Order Effected!");
+                System.out.println("Triggering Automatic Stock Ordering...");
+
+                ItemOrder itemOrder = new ItemOrder(idCase5,qtyEntry);
+                ItemOrder [] items = {itemOrder};
+                SupplierResponse[] supplierResponse = catalogue.automatedStockOrdering(items);
+
+                System.out.println("Supplier Response: "+supplierResponse[0].supplierErrorCode);
                 break;
+
             case 6:
-                //do logic
+                System.out.println("Total Profit generated: "+catalogue.totalProfit);
                 break;
+
             case 7:
                 System.exit(0);
         }

@@ -12,11 +12,12 @@ public class StockItem {
     protected int quantity;
     protected int orderAmount;
     protected String supplier;
+    protected double costPrice;
     protected double sellingPrice;
     protected int numTimesSold;
 
     public StockItem(int id, String name, String category, String description, int minimumOrderQty,
-                     int quantity, int orderAmount,  double sellingPrice) {
+                     int quantity, int orderAmount, double costPrice, double sellingPrice) {
         this.id = id;
         // Random ID
         // id = UUID.randomUUID().toString();
@@ -26,6 +27,7 @@ public class StockItem {
         this.minimumOrderQty = minimumOrderQty;
         this.quantity = quantity;
         this.orderAmount = orderAmount;
+        this.costPrice = costPrice;
         this.sellingPrice = sellingPrice;
         numTimesSold = 0;
     }

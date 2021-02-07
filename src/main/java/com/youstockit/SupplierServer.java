@@ -7,8 +7,8 @@ import com.youstockit.users.Supplier;
 public class SupplierServer {
 
     protected SupplierOrderService supplierOrderService;
-    ItemOrder itemOrder[];
-    Supplier supplier;
+    protected ItemOrder itemOrder[];
+    public Supplier supplier;
     protected EmailService emailService;
 
 

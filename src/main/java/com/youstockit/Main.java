@@ -43,11 +43,12 @@ public class Main {
         ProductCatalogue catalogue = provisioning.provideMultiStockedCatalogue();
         SupplierServer supplierServer = provisioningSupplier.provideSupplierServer();
         Manager manager= new Manager("Mgr Test", "manager@test.com");
+        Supplier supplier = new Supplier("Supplier Test", "supplier@test.com", supplierServer);
         EmailServiceStub emailServiceStub = new EmailServiceStub();
         OrderServiceStub orderServiceStub = new OrderServiceStub();
         SupplierOrderServiceStub supplierOrderServiceStub = new SupplierOrderServiceStub();
 
-        catalogue.setSupplierServer(supplierServer);
+        catalogue.setSupplier(supplier);
         catalogue.setManager(manager);
         catalogue.setEmailService(emailServiceStub);
         catalogue.setOrderService(orderServiceStub);

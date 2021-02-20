@@ -8,6 +8,10 @@ public class EmailServiceSpy implements EmailService {
 
     public int numCallsSendEmail = 0;
 
+    public int returnNumCalls() {
+        return numCallsSendEmail;
+    }
+
     public void sendEmail(User user){
         numCallsSendEmail++;
     }

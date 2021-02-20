@@ -11,7 +11,6 @@ public class StockItem {
     protected int minimumOrderQty;
     protected int quantity;
     protected int orderAmount;
-    protected String supplier;
     protected double costPrice;
     protected double sellingPrice;
     protected int numTimesSold;

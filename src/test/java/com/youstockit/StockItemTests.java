@@ -26,7 +26,7 @@ public class StockItemTests {
     @Test
     public void testCreateStockItemShortName() {
         //Setup
-        String name = "a";
+        String name = "abcd";
 
         //Exercise
         stockItem = new StockItem(1, name, "Testing", "Test Item", 10, 1000, 250, 1.00,1.50);
@@ -69,7 +69,7 @@ public class StockItemTests {
     public void testCreateStockItemCorrectDescription() {
         //Setup
         String description = "";
-        for(int i=0; i<= 499; i++){
+        for(int i=0; i< 500; i++){
             description = description + "a";
         }
 

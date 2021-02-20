@@ -1,29 +1,45 @@
 package com.youstockit;
 
 import com.youstockit.factories.CatalogueProvisioning;
+import com.youstockit.factories.SupplierServerProvisioning;
+import com.youstockit.services.SupplierOrderService;
 import com.youstockit.spies.EmailServiceSpy;
 import com.youstockit.users.Manager;
+import com.youstockit.users.Supplier;
 import org.junit.jupiter.api.Assertions;
 import org.junit.jupiter.api.BeforeEach;
 import org.junit.jupiter.api.Test;
+import org.mockito.Mockito;
 
 import java.util.List;
 
 public class ProductCatalogueTests {
 
     CatalogueProvisioning provisioning;
+    SupplierServerProvisioning provisioningSupplier;
     ProductCatalogue productCatalogue;
+    SupplierServer supplierServer;
+    Supplier supplier;
     StockItem stockItem;
     Manager manager;
     EmailServiceSpy emailServiceSpy;
+    SupplierOrderService supplierOrderService;
+
 
     @BeforeEach
     public void setup(){
         productCatalogue = new ProductCatalogue();
         // Instantiating object of Product Catalogue Factory
         provisioning = new CatalogueProvisioning();
+        provisioningSupplier = new SupplierServerProvisioning();
+
+        // Using Supplier Server test double provided from factory
+        supplierServer = provisioningSupplier.provideSupplierServer();
         emailServiceSpy = new EmailServiceSpy();
 
+        supplierOrderService = Mockito.mock(SupplierOrderService.class);
+
+        supplier = new Supplier("Supplier Test", "supplier@test.com", supplierServer);
         manager= new Manager("Mgr Test", "manager@test.com");
         stockItem = new StockItem(2, "Test Product 2", "Validating", "Validation Item", 5,
                 10, 20, 1.00,1.50);
@@ -51,6 +67,19 @@ public class ProductCatalogueTests {
 
         //Verify
         Assertions.assertEquals(1, productCatalogue.items.size());
+    }
+
+    @Test
+    public void testProductCatalogueWithMoreThanOneItem() {
+        //Setup
+        ProductCatalogue productCatalogue = provisioning.provideMultiStockedCatalogue();
+
+        //Exercise
+        List<StockItem> items = productCatalogue.items;
+
+        //Verify
+        Assertions.assertNotEquals(1, productCatalogue.items.size());
+        Assertions.assertNotEquals(0, productCatalogue.items.size());
     }
 
     @Test
@@ -193,7 +222,7 @@ public class ProductCatalogueTests {
     @Test
     public void testSellItemWrongId(){
         //Setup
-        ProductCatalogue productCatalogue = provisioning.provideMultiStockedCatalogue();
+        ProductCatalogue productCatalogue = provisioning.provideStockedCatalogue();
         StockItem item = productCatalogue.items.get(0);
         int itemQuantity = item.quantity;
 
@@ -209,13 +238,62 @@ public class ProductCatalogueTests {
         //Setup
         ProductCatalogue productCatalogue = provisioning.provideMultiStockedCatalogue();
         StockItem item = productCatalogue.items.get(0);
-        int itemQuantity = item.quantity;
+
+        //Setup - Automatic Stock Ordering
+        Mockito.when(supplierOrderService.getQuantitySupplied()).thenReturn(item.orderAmount);
+        Mockito.when(supplierOrderService.getOrderCode()).thenReturn(SupplierErrorCode.SUCCESS);
+        supplier.supplierServer.setSupplierOrderService(supplierOrderService);
+        productCatalogue.setSupplier(supplier);
 
         //Exercise
-        productCatalogue.sellItem(item.id, item.quantity + 1);
+        int sellSuccess = productCatalogue.sellItem(item.id, item.quantity + 1);
 
         //Verify
-        Assertions.assertEquals(itemQuantity, productCatalogue.searchCatalogue(item.id).quantity);
+        Assertions.assertEquals(0, sellSuccess);
+    }
+
+    @Test
+    public void testProfitFromSellingItem(){
+        //Setup
+        ProductCatalogue productCatalogue = provisioning.provideMultiStockedCatalogue();
+        StockItem item = productCatalogue.items.get(0);
+        int qtyToSell = 5;
+        double itemSellingPrice = item.sellingPrice;
+        double itemCostPrice = item.costPrice;
+        double expectedProfit = itemSellingPrice - itemCostPrice;
+
+
+        //Exercise
+        productCatalogue.sellItem(item.id, qtyToSell);
+        double profit = productCatalogue.totalProfit;
+
+        //Verify
+        Assertions.assertEquals(expectedProfit * qtyToSell, profit);
+    }
+
+    @Test
+    public void testProfitFromSellingMultipleItems(){
+        //Setup
+        ProductCatalogue productCatalogue = provisioning.provideMultiStockedCatalogue();
+        StockItem item1 = productCatalogue.items.get(0);
+        StockItem item2 = productCatalogue.items.get(1);
+        int qtyToSell1 = 5;
+        int qtyToSell2 = 2;
+        double item1SellingPrice = item1.sellingPrice;
+        double item2SellingPrice = item2.sellingPrice;
+        double item1CostPrice = item1.costPrice;
+        double item2CostPrice = item2.costPrice;
+        double expectedProfit1 = item1SellingPrice - item1CostPrice;
+        double expectedProfit2 = item2SellingPrice - item2CostPrice;
+
+
+        //Exercise
+        productCatalogue.sellItem(item1.id, qtyToSell1);
+        productCatalogue.sellItem(item2.id, qtyToSell2);
+        double profit = productCatalogue.totalProfit;
+
+        //Verify
+        Assertions.assertEquals((expectedProfit1 * qtyToSell1) + (expectedProfit2 * qtyToSell2) , profit);
     }
 
     @Test
@@ -224,7 +302,6 @@ public class ProductCatalogueTests {
         //Setup
         ProductCatalogue productCatalogue = provisioning.provideMultiStockedCatalogue();
         StockItem item = productCatalogue.items.get(0);
-        int itemQuantity = item.quantity;
         int quantityOrdered = item.quantity - item.minimumOrderQty;
 
         //Exercise
@@ -240,7 +317,6 @@ public class ProductCatalogueTests {
         //Setup
         ProductCatalogue productCatalogue = provisioning.provideMultiStockedCatalogue();
         StockItem item = productCatalogue.items.get(0);
-        int itemQuantity = item.quantity;
         int quantityOrdered = item.quantity - item.minimumOrderQty;
 
         //Exercise

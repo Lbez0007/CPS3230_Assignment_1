@@ -7,8 +7,6 @@ import com.youstockit.users.Supplier;
 public class SupplierServer {
 
     protected SupplierOrderService supplierOrderService;
-    protected ItemOrder itemOrder[];
-    public Supplier supplier;
     protected EmailService emailService;
 
 
@@ -28,6 +26,7 @@ public class SupplierServer {
         return supplierResponses;
     }
 
+    // Setters for dependency injection
     public void setSupplierOrderService(SupplierOrderService supplierOrderService) {
         this.supplierOrderService = supplierOrderService;
     }

@@ -17,6 +17,7 @@ public class SupplierResponseTests {
 
     SupplierServer supplierServer;
     Supplier supplier;
+    Supplier supplierNoServer;
     Manager manager;
     ProductCatalogue productCatalogue;
     CatalogueProvisioning provisioning;
@@ -30,9 +31,10 @@ public class SupplierResponseTests {
     @BeforeEach
     public void setup(){
         supplierServer =  new SupplierServer();
-        supplier = new Supplier("Mr Test", "test@test.com");
+        supplier = new Supplier("Mr Test", "test@test.com", supplierServer);
+        supplierNoServer = new Supplier("Mr Test 2", "test2@test.com");
         manager= new Manager("Mgr Test", "manager@test.com");
-        supplierServer.supplier = supplier;
+
 
         // Instantiating objects of Product Catalogue and Supplier Server Factories
         provisioning = new CatalogueProvisioning();
@@ -45,7 +47,7 @@ public class SupplierResponseTests {
         // Using Stocked Catalogue test double provided from factory
         productCatalogue = provisioning.provideStockedCatalogue();
         // Using Supplier Server test double provided from factory
-        supplierServer = provisioningSupplier.provideSupplierServer();
+        supplier.supplierServer = provisioningSupplier.provideSupplierServer();
 
         stockItem = productCatalogue.items.get(0);
         stockItemQty = stockItem.quantity;
@@ -56,7 +58,7 @@ public class SupplierResponseTests {
     }
 
     @Test
-    public void orderStockItemSuccessful(){
+    public void testOrderStockItemSuccessful(){
         // Setup
         int qtyItemsOrdered = 5;
         ItemOrder itemOrder = new ItemOrder(1, qtyItemsOrdered);
@@ -64,9 +66,9 @@ public class SupplierResponseTests {
 
         Mockito.when(supplierOrderService.getQuantitySupplied()).thenReturn(itemOrder.qtyItemsOrdered);
         Mockito.when(supplierOrderService.getOrderCode()).thenReturn(SupplierErrorCode.SUCCESS);
-        supplierServer.setSupplierOrderService(supplierOrderService);
-        supplierServer.setEmailService(emailServiceSpy);
-        productCatalogue.setSupplierServer(supplierServer);
+        supplier.supplierServer.setSupplierOrderService(supplierOrderService);
+        supplier.supplierServer.setEmailService(emailServiceSpy);
+        productCatalogue.setSupplier(supplier);
 
         // Exercise
         productCatalogue.automatedStockOrdering(items);
@@ -76,7 +78,7 @@ public class SupplierResponseTests {
     }
 
     @Test
-    public void orderStockItemOutOfStock(){
+    public void testOrderStockItemOutOfStock(){
 
         // Setup
         int qtyItemsOrdered = 1001;
@@ -85,9 +87,9 @@ public class SupplierResponseTests {
 
         Mockito.when(supplierOrderService.getQuantitySupplied()).thenReturn(stockItem.quantity);
         Mockito.when(supplierOrderService.getOrderCode()).thenReturn(SupplierErrorCode.OUT_OF_STOCK);
-        supplierServer.setSupplierOrderService(supplierOrderService);
-        supplierServer.setEmailService(emailServiceSpy);
-        productCatalogue.setSupplierServer(supplierServer);
+        supplier.supplierServer.setSupplierOrderService(supplierOrderService);
+        supplier.supplierServer.setEmailService(emailServiceSpy);
+        productCatalogue.setSupplier(supplier);
 
         // Exercise
         productCatalogue.automatedStockOrdering(items);
@@ -98,18 +100,18 @@ public class SupplierResponseTests {
     }
 
     @Test
-    public void orderStockItemCommunicationError(){
+    public void testOrderStockItemCommunicationError(){
 
         // Setup
         int qtyItemsOrdered = 5;
         ItemOrder itemOrder = new ItemOrder(1, qtyItemsOrdered);
         ItemOrder[] items = {itemOrder};
 
-        Mockito.when(supplierOrderService.getQuantitySupplied()).thenReturn(stockItem.quantity);
+        Mockito.when(supplierOrderService.getQuantitySupplied()).thenReturn(0);
         Mockito.when(supplierOrderService.getOrderCode()).thenReturn(SupplierErrorCode.COMMUNICATION_ERROR);
-        supplierServer.setSupplierOrderService(supplierOrderService);
-        supplierServer.setEmailService(emailServiceSpy);
-        productCatalogue.setSupplierServer(supplierServer);
+        supplier.supplierServer.setSupplierOrderService(supplierOrderService);
+        supplier.supplierServer.setEmailService(emailServiceSpy);
+        productCatalogue.setSupplier(supplier);
 
         // Exercise
         productCatalogue.automatedStockOrdering(items);
@@ -121,7 +123,7 @@ public class SupplierResponseTests {
     }
 
     @Test
-    public void orderStockItemNotFound(){
+    public void testOrderStockItemNotFound(){
 
         // Setup
         int qtyItemsOrdered = 1001;
@@ -130,9 +132,9 @@ public class SupplierResponseTests {
 
         Mockito.when(supplierOrderService.getQuantitySupplied()).thenReturn(0);
         Mockito.when(supplierOrderService.getOrderCode()).thenReturn(SupplierErrorCode.ITEM_NOT_FOUND);
-        supplierServer.setSupplierOrderService(supplierOrderService);
-        supplierServer.setEmailService(emailServiceSpy);
-        productCatalogue.setSupplierServer(supplierServer);
+        supplier.supplierServer.setSupplierOrderService(supplierOrderService);
+        supplier.supplierServer.setEmailService(emailServiceSpy);
+        productCatalogue.setSupplier(supplier);
 
         // Exercise
         productCatalogue.automatedStockOrdering(items);
@@ -142,7 +144,7 @@ public class SupplierResponseTests {
     }
 
     @Test
-    public void orderStockItemNotFoundSellAll(){
+    public void testOrderStockItemNotFoundSellAll(){
 
         // Setup
         int qtyItemsOrdered = 1001;
@@ -151,9 +153,9 @@ public class SupplierResponseTests {
 
         Mockito.when(supplierOrderService.getQuantitySupplied()).thenReturn(0);
         Mockito.when(supplierOrderService.getOrderCode()).thenReturn(SupplierErrorCode.ITEM_NOT_FOUND);
-        supplierServer.setSupplierOrderService(supplierOrderService);
-        supplierServer.setEmailService(emailServiceSpy);
-        productCatalogue.setSupplierServer(supplierServer);
+        supplier.supplierServer.setSupplierOrderService(supplierOrderService);
+        supplier.supplierServer.setEmailService(emailServiceSpy);
+        productCatalogue.setSupplier(supplier);
 
         // Exercise
         productCatalogue.automatedStockOrdering(items);
@@ -164,7 +166,7 @@ public class SupplierResponseTests {
     }
 
     @Test
-    public void orderStockItemNotFoundSellAllBarOne(){
+    public void testOrderStockItemNotFoundSellAllBarOne(){
 
         // Setup
         int qtyItemsOrdered = 1001;
@@ -173,9 +175,9 @@ public class SupplierResponseTests {
 
         Mockito.when(supplierOrderService.getQuantitySupplied()).thenReturn(0);
         Mockito.when(supplierOrderService.getOrderCode()).thenReturn(SupplierErrorCode.ITEM_NOT_FOUND);
-        supplierServer.setSupplierOrderService(supplierOrderService);
-        supplierServer.setEmailService(emailServiceSpy);
-        productCatalogue.setSupplierServer(supplierServer);
+        supplier.supplierServer.setSupplierOrderService(supplierOrderService);
+        supplier.supplierServer.setEmailService(emailServiceSpy);
+        productCatalogue.setSupplier(supplier);
 
         // Exercise
         productCatalogue.automatedStockOrdering(items);
